@@ -1,4 +1,5 @@
 const app = require('express')();
+const server = require('http').createServer(app);
 const morgan = require('morgan');
 const helmet = require('helmet');
 const cors = require('cors');
@@ -27,4 +28,4 @@ app.use((err, req, res, next)=>{
   }
   res.status(500).json(response);
 });
-module.exports = app;
+module.exports = {app, server};

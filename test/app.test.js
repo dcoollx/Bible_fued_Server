@@ -19,7 +19,10 @@ describe('server response with 200 on all valid URL',()=>{
 describe('each endpoint returns appropriate response',()=>{
   describe('/create',()=>{
     it('returns a random key',()=>{
-      return request(app).get('/create').expect();
+      return request(app).get('/create').expect(200, {roomCode : 'Test123'});
+    });
+    it('returns an error if it cant create room',()=>{
+      return request(app).get('/create').expect(400);
     });
   });
 });
