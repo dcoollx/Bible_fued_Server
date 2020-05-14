@@ -8,20 +8,34 @@ const io = require('socket.io')(server);
 //const knex = require('knex');
 
 //let db = knex({});
-
+var openGames = {};
 let games = io.of('/games');
 games.on('connection', (soc)=>{
   console.log('someone connects');
   soc.on('create',()=>{
     console.log('new room created');
     //gen rendaom room key
+    let key = hri.random();
+    openGames[key] = soc.id;
 
-    soc.emit('newRoom',{roomCode : hri.random()});
+    soc.emit('newRoom',{roomCode :key});
   });
   soc.on('join',(data)=>{
-    soc.join(data.roomCode);
-    console.log(`player joined ${data.roomCode} room`);
+    //first check it successfull
+    let key = data.roomCode;
+    if(openGames[key]){
+      soc.join(data.roomCode);
+      soc.to(key).emit('joined',{name:'player_name'});
+      console.log(`player joined ${data.roomCode} room`);
+    }else{
+      console.log('that game doent exsist');
+    }
+    
     //console.log(data);
+  });
+  soc.on('start',()=>{
+    console.log('starting');
+    console.log('this is sent to :',Object.keys(soc.rooms)[1]);
   });
 });
 games.on('disconnect',(soc)=>{
