@@ -34,8 +34,10 @@ games.on('connection', (soc)=>{
     //console.log(data);
   });
   soc.on('start',()=>{
+    let key = Object.keys(soc.rooms)[1];
     console.log('starting');
     console.log('this is sent to :',Object.keys(soc.rooms)[1]);
+    io.of('/games').to(key).emit('start');
   });
 });
 games.on('disconnect',(soc)=>{
