@@ -37,7 +37,8 @@ games.on('connection', (soc)=>{
     let key = Object.keys(soc.rooms)[1];
     console.log('starting');
     console.log('this is sent to :',Object.keys(soc.rooms)[1]);
-    io.of('/games').to(key).emit('start');
+    io.of('games').to(key).emit('start');
+    //io.of('myNamespace').to('room').emit('event', 'message');
   });
 });
 games.on('disconnect',(soc)=>{
