@@ -3,6 +3,7 @@ const server = require('http').createServer(app);
 const morgan = require('morgan');
 const helmet = require('helmet');
 const cors = require('cors');
+const  questionRoute = require('./questionsRoute/questionRoute');
 require('dotenv').config();
 
 const {NODE_ENV} = require('./config');
@@ -16,6 +17,8 @@ app.use(morgan(morganOptions));
 app.get('/',(req,res)=>{
   res.status(200).send('Hello World');
 });
+
+app.use('/questions',questionRoute);
 
 //error handle
 app.use((err, req, res, next)=>{
