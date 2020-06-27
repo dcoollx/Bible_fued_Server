@@ -29,8 +29,8 @@ games.on('connection', (soc)=>{
     let key = data.roomCode;
     if(openGames[key]){
       soc.join(data.roomCode);
-      soc.to(key).emit('joined',{name:data.name});
       openGames[key].players.push({name:data.name, score:0});
+      io.of('games').to(key).emit('joined',openGames[key].players);
       console.log(`${data.name} joined ${data.roomCode} room`);
     }else{
       console.log('that game doent exsist');
@@ -42,8 +42,33 @@ games.on('connection', (soc)=>{
     let key = Object.keys(soc.rooms)[1];
     console.log('starting');
     console.log('this is sent to :',Object.keys(soc.rooms)[1]);
+    //TODO check if enough players
     io.of('games').to(key).emit('start');
     //io.of('myNamespace').to('room').emit('event', 'message');
+  });
+  soc.on('answer',(data)=>{
+    //should have name and choice
+    console.log(' answered' + data);
+  });
+  soc.on('question',(question)=>{
+    console.log(soc.rooms, 'asked',question.length, 'questions');
+    soc.to(Object.keys(soc.rooms)[1]).emit('questions',question);
+  });
+  soc.on('round',()=>{
+    let key = Object.keys(soc.rooms)[1];
+    soc.to(key).emit('round');
+
+  });
+  soc.on('leave',(isHost)=>{
+    let key = Object.keys(soc.rooms)[1];
+    if(isHost){
+      io.of('games').to(key).emit('cancel');
+      console.log('host has left, closing room');
+    }
+    else{
+      console.log('player left ' + key);
+      //TODO remove from player list
+    }
   });
 });
 games.on('disconnect',(soc)=>{
