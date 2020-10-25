@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+const dbService = require('./services/dbServices');
 const hri = require('human-readable-ids').hri;
 const app = require('./app').app;
 const server = require('./app').server;
@@ -20,7 +21,7 @@ games.on('connection', (soc)=>{
     console.log('new room created');
     //gen rendaom room key
     let key = hri.random();
-    openGames[key] = {id:soc.id, players : []};
+    openGames[key] = {id:soc.id, players : [],questions : []};
 
     soc.emit('newRoom',{roomCode :key});
   });
@@ -33,17 +34,20 @@ games.on('connection', (soc)=>{
       io.of('games').to(key).emit('joined',openGames[key].players);
       console.log(`${data.name} joined ${data.roomCode} room`);
     }else{
+      soc.emit('Server_error',{error:'that game doesnt exist'});
       console.log('that game doent exsist');
     }
     
     //console.log(data);
   });
-  soc.on('start',()=>{
+  soc.on('startGame',()=>{
     let key = Object.keys(soc.rooms)[1];
-    console.log('starting');
-    console.log('this is sent to :',Object.keys(soc.rooms)[1]);
+    console.log('starting room' + key);
     //TODO check if enough players
-    io.of('games').to(key).emit('start');
+    //get questions
+    openGames[key].questions = dbService.getQuestion(db);
+    //openGames[key].start = Date.now();
+    io.of('games').to(key).emit('start',{start : Date.now()});
     //io.of('myNamespace').to('room').emit('event', 'message');
   });
   soc.on('answer',(data)=>{
@@ -51,7 +55,7 @@ games.on('connection', (soc)=>{
     console.log(' answered' + data);
   });
   soc.on('question',(question)=>{
-    console.log(soc.rooms, 'asked',question.length, 'questions');
+    //console.log(soc.rooms, 'asked',question.length, 'questions');
     soc.to(Object.keys(soc.rooms)[1]).emit('questions',question);
   });
   soc.on('round',()=>{
