@@ -55,8 +55,9 @@ games.on('connection', (soc)=>{
     console.log(' answered' + data);
   });
   soc.on('question',(question)=>{
-    //console.log(soc.rooms, 'asked',question.length, 'questions');
-    soc.to(Object.keys(soc.rooms)[1]).emit('questions',question);
+    let key = Object.keys(soc.rooms)[1];
+    console.log(soc.rooms, 'asked',question.length, 'questions');
+    io.of('games').to(key).emit('questions',question);
   });
   soc.on('round',()=>{
     let key = Object.keys(soc.rooms)[1];
@@ -73,6 +74,7 @@ games.on('connection', (soc)=>{
       console.log('player left ' + key);
       //TODO remove from player list
     }
+    soc.leaveAll();
   });
 });
 games.on('disconnect',(soc)=>{
